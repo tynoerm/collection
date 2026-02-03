@@ -1,5 +1,5 @@
 import express from "express";
-import bcrypt from "bcryptjs";   // 👈 IMPORTANT CHANGE
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const [rows] = await req.db.query(
+    const [rows] = await req.db.execute(
       "SELECT id, full_name, email, password FROM users WHERE email = ? LIMIT 1",
       [email]
     );
@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
     if (!rows.length) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid email or password",
       });
     }
 
@@ -33,7 +33,7 @@ router.post("/", async (req, res) => {
     if (!match) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid email or password",
       });
     }
 
@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("LOGIN ERROR FULL:", err);
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({
       success: false,
       message: "Server error",
