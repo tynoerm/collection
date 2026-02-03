@@ -30,6 +30,8 @@ router.post("/", async (req, res) => {
 
     const user = rows[0];
 
+    console.log("USER FROM DB:", user); // Debug log
+
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
 
@@ -51,12 +53,13 @@ router.post("/", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Login error:", err);
+    console.error("Login error FULL:", err);
+
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: err.message || "Server error",
     });
   }
-});
+}); // <-- THIS WAS MISSING
 
 export default router;
