@@ -3,25 +3,23 @@ import bcrypt from "bcrypt";
 
 const router = express.Router();
 
-// POST /api/login
 router.post("/", async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Email and password are required",
-    });
-  }
-
   try {
-    // Query MySQL for user
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password required",
+      });
+    }
+
     const [rows] = await req.db.query(
       "SELECT id, full_name, email, password FROM users WHERE email = ? LIMIT 1",
       [email]
     );
 
-    if (rows.length === 0) {
+    if (!rows.length) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
@@ -30,36 +28,31 @@ router.post("/", async (req, res) => {
 
     const user = rows[0];
 
-    console.log("USER FROM DB:", user); // Debug log
+    const match = await bcrypt.compare(password, user.password);
 
-    // Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
+    if (!match) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
       });
     }
 
-    // Success
     res.json({
       success: true,
-      message: "Login successful",
       user: {
         id: user.id,
         fullName: user.full_name,
         email: user.email,
       },
     });
-  } catch (err) {
-    console.error("Login error FULL:", err);
 
+  } catch (err) {
+    console.error("LOGIN CRASH:", err);
     res.status(500).json({
       success: false,
-      message: err.message || "Server error",
+      message: "Server error",
     });
   }
-}); // <-- THIS WAS MISSING
+});
 
 export default router;
