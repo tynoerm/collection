@@ -87,7 +87,8 @@ app.use((req, res, next) => {
 // ======================
 import LoginRoute from "./Routes/LoginRoute.js";
 
-app.use("/api/users", LoginRoute);
+app.use("/api/login", LoginRoute);
+
 
 
 
